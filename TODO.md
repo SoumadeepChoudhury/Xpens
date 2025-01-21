@@ -6,7 +6,6 @@ Project Description
 
 ### Todo
 
-- [ ] Create the bottom navigation bar  
 - [ ] Create listing for custom and common used items like Food, Grocery, Sports etc along with the icons for each group  
 - [ ] Database Schema will have slno, Date and Time, Group of the expenditure or earning, Description of the change, Amount  
 - [ ] Build UI for HomePage  
@@ -19,4 +18,5 @@ Project Description
 
 ### Done ✓
 
+- [x] Create the bottom navigation bar  
 

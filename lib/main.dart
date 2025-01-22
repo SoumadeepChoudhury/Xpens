@@ -13,10 +13,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Xpens',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
+      theme: ThemeData(brightness: Brightness.dark),
+      darkTheme: ThemeData.dark(),
+      themeMode: ThemeMode.system,
       home: CustomBottomNavigationBar(),
       debugShowCheckedModeBanner: false,
     );

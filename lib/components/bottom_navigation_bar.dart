@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:xpens/pages/analysis_page.dart';
+import 'package:xpens/pages/cards_page.dart';
+import 'package:xpens/pages/home_page.dart';
+import 'package:xpens/pages/profile_page.dart';
 import 'package:xpens/variables.dart';
 
 class CustomBottomNavigationBar extends StatefulWidget {
@@ -10,76 +14,93 @@ class CustomBottomNavigationBar extends StatefulWidget {
 }
 
 class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar> {
+  final List<Widget> _pages = [
+    HomePage(),
+    CardsPage(),
+    AnalysisPage(),
+    ProfilePage()
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBody: true,
+      body: _pages[currentPageIndex],
       resizeToAvoidBottomInset: false,
       bottomNavigationBar: SafeArea(
-          child: Container(
-        height: bottomNavigationBar_height,
-        margin: EdgeInsets.symmetric(
-            horizontal: bottomNavigationBar_hmargin, vertical: 5),
-        decoration: BoxDecoration(
-            color: Color(bottomNavigationBar_color).withValues(alpha: 0.8),
-            borderRadius:
-                BorderRadius.all(Radius.circular(bottomNavigationBar_hmargin)),
-            boxShadow: [
-              BoxShadow(
-                  color:
-                      Color(bottomNavigationBar_color).withValues(alpha: 0.3),
-                  offset: Offset(-10, 20),
-                  blurRadius: bottomNavigationBar_hmargin)
-            ]),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            NavigationItem(
-              icon: Icons.home_outlined,
-              label: "Home",
-            ),
-            NavigationItem(
-              icon: Icons.attach_money_outlined,
-              label: "Wallet",
-            ),
-            NavigationItem(
-              icon: Icons.add,
-              label: "Add",
-            ),
-            NavigationItem(
-              icon: Icons.analytics_outlined,
-              label: "Analysis",
-            ),
-            NavigationItem(
-              icon: Icons.person_outline_outlined,
-              label: "Profile",
-            ),
-          ],
+        child: Container(
+          height: bottomNavigationBar_height,
+          margin: EdgeInsets.only(
+              left: bottomNavigationBar_hmargin,
+              right: bottomNavigationBar_hmargin,
+              bottom: 10),
+          decoration: BoxDecoration(
+              color: Color(bottomNavigationBar_color).withValues(alpha: 0.8),
+              borderRadius: BorderRadius.all(
+                  Radius.circular(bottomNavigationBar_hmargin)),
+              boxShadow: [
+                BoxShadow(
+                    color:
+                        Color(bottomNavigationBar_color).withValues(alpha: 0.3),
+                    offset: Offset(-10, 20),
+                    blurRadius: bottomNavigationBar_hmargin)
+              ]),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              NavigationItem(
+                icon: Icons.home_outlined,
+                label: "Home",
+                index: 0,
+              ),
+              NavigationItem(
+                icon: Icons.attach_money_outlined,
+                label: "Wallet",
+                index: 1,
+              ),
+              NavigationItem(
+                icon: Icons.add,
+                label: "Add",
+                index: 909,
+              ),
+              NavigationItem(
+                icon: Icons.analytics_outlined,
+                label: "Analysis",
+                index: 2,
+              ),
+              NavigationItem(
+                icon: Icons.person_outline_outlined,
+                label: "Profile",
+                index: 3,
+              ),
+            ],
+          ),
         ),
-      )),
+      ),
     );
   }
-}
 
-class NavigationItem extends StatelessWidget {
-  const NavigationItem({super.key, required this.icon, required this.label});
-
-  final IconData icon;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(
-          icon,
-          color: Colors.white,
-        ),
-        Text(
-          label,
-          style: TextStyle(color: Colors.white),
-        )
-      ],
+  Widget NavigationItem(
+      {required IconData icon, required String label, required int index}) {
+    return GestureDetector(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            icon,
+            color: Colors.white,
+          ),
+          Text(
+            label,
+            style: TextStyle(color: Colors.white),
+          )
+        ],
+      ),
+      onTap: () {
+        setState(() {
+          currentPageIndex = index;
+        });
+      },
     );
   }
 }

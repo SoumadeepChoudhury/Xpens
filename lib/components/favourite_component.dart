@@ -23,17 +23,15 @@ class FavouriteCategory extends StatelessWidget {
             height: 60,
             decoration: !isAddButton
                 ? BoxDecoration(
-                    color: !isAddButton
-                        ? Color.fromARGB(255, 241, 178, 255)
-                        : Colors.white,
+                    color: Color.fromARGB(255, 241, 178, 255),
                     shape: BoxShape.circle,
                     boxShadow: [
                         BoxShadow(
                             color:
                                 Colors.deepPurpleAccent.withValues(alpha: 0.5),
                             blurRadius: 20,
-                            spreadRadius: 2,
-                            offset: Offset(2.5, 5))
+                            spreadRadius: 0.1,
+                            offset: Offset(6.5, 12))
                       ])
                 : BoxDecoration(),
             child: Icon(

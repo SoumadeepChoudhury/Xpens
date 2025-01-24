@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:xpens/components/favourite_component.dart';
+import 'package:xpens/components/recent_transaction.dart';
+import 'package:xpens/components/recent_transaction_date.dart';
 import 'package:xpens/variables.dart';
 
 class HomePage extends StatelessWidget {
@@ -157,6 +159,7 @@ class HomePage extends StatelessWidget {
             SizedBox(
               height: 20,
             ),
+            //Recent transactions section
             Container(
               padding: EdgeInsets.only(left: 8),
               child: Column(
@@ -165,6 +168,47 @@ class HomePage extends StatelessWidget {
                   Text(
                     "Recent Transactions",
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25),
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.22,
+                    child: SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          RecentTransactionDate(label: "Today"),
+                          RecentTransaction(
+                            icon: Icons.fastfood,
+                            title: "Lunch",
+                            category: "Food",
+                            amount: "100.00",
+                          ),
+                          Divider(),
+                          RecentTransaction(
+                            icon: Icons.fastfood,
+                            title: "Lunch",
+                            category: "Food",
+                            amount: "100.00",
+                          ),
+                          RecentTransactionDate(label: "January 22, 2025"),
+                          RecentTransaction(
+                            icon: Icons.fastfood,
+                            title: "Lunch",
+                            category: "Food",
+                            amount: "100.00",
+                          ),
+                          Divider(),
+                          RecentTransaction(
+                            icon: Icons.fastfood,
+                            title: "Lunch",
+                            category: "Food",
+                            amount: "100.00",
+                          ),
+                        ],
+                      ),
+                    ),
                   )
                 ],
               ),

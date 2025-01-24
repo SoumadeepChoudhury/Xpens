@@ -25,9 +25,36 @@ class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar> {
   Widget build(BuildContext context) {
     return Scaffold(
       extendBody: true,
-      body: AnimatedSwitcher(
-        duration: Duration(milliseconds: 500),
-        child: _pages[currentPageIndex],
+      body: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onHorizontalDragEnd: (details) {
+          if (details.velocity.pixelsPerSecond.dx > 1000) {
+            setState(() {
+              if (currentPageIndex > 0) {
+                currentPageIndex -= 1;
+              }
+            });
+          } else if (details.velocity.pixelsPerSecond.dx < -1000) {
+            setState(() {
+              if (currentPageIndex != _pages.length - 1) {
+                currentPageIndex += 1;
+              }
+            });
+          }
+        },
+        child: AnimatedSwitcher(
+          duration: Duration(milliseconds: 500),
+          // transitionBuilder: (child, animation) => SlideTransition(
+          //   position: animation.drive(
+          //     Tween<Offset>(
+          //       begin: Offset(-1.0, 0.0),
+          //       end: Offset.zero,
+          //     ).chain(CurveTween(curve: Curves.easeInToLinear)),
+          //   ),
+          //   child: child,
+          // ),
+          child: _pages[currentPageIndex],
+        ),
       ),
       resizeToAvoidBottomInset: false,
       bottomNavigationBar: SafeArea(

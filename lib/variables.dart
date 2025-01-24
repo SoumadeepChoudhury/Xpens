@@ -3,3 +3,7 @@ double bottomNavigationBar_padding = 12;
 double bottomNavigationBar_hmargin = 20;
 int bottomNavigationBar_color = 0x220033;
 int currentPageIndex = 0;
+double home_page_profile_icon_size = 50;
+double home_page_profile_text_size = 20;
+double your_current_balance_text_size = 15;
+double balance_value_text_size = 50;

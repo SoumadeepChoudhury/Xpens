@@ -25,7 +25,10 @@ class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar> {
   Widget build(BuildContext context) {
     return Scaffold(
       extendBody: true,
-      body: _pages[currentPageIndex],
+      body: AnimatedSwitcher(
+        duration: Duration(milliseconds: 500),
+        child: _pages[currentPageIndex],
+      ),
       resizeToAvoidBottomInset: false,
       bottomNavigationBar: SafeArea(
         child: Container(
@@ -59,11 +62,6 @@ class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar> {
                 index: 1,
               ),
               NavigationItem(
-                icon: Icons.add,
-                label: "Add",
-                index: 909,
-              ),
-              NavigationItem(
                 icon: Icons.analytics_outlined,
                 label: "Analysis",
                 index: 2,
@@ -88,11 +86,17 @@ class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar> {
         children: [
           Icon(
             icon,
-            color: Colors.white,
+            color: currentPageIndex == index ? Colors.white : Colors.white70,
+            size: currentPageIndex == index ? 30 : 25,
           ),
           Text(
             label,
-            style: TextStyle(color: Colors.white),
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: currentPageIndex == index
+                  ? FontWeight.bold
+                  : FontWeight.normal,
+            ),
           )
         ],
       ),

@@ -14,3 +14,8 @@ double balance_value_text_size = 50;
 
 Color amount_deducted_color = Color.fromARGB(255, 244, 54, 127);
 Color amount_added_color = Colors.green;
+
+String balance_amount = "11,987.28";
+
+String userName = "Soumadeep Choudhury";
+String email = "ahensinitiative@gmail.com";

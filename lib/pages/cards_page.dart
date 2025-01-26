@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:xpens/components/accounts.dart';
 import 'package:xpens/components/primary_account_card.dart';
+import 'package:xpens/variables.dart';
 
 class CardsPage extends StatelessWidget {
   const CardsPage({super.key});
@@ -26,7 +27,7 @@ class CardsPage extends StatelessWidget {
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
           ),
-          PrimaryAccountCard(amount: "11,987.28", account: "SBI"),
+          PrimaryAccountCard(amount: balance_amount, account: "SBI"),
           SizedBox(height: 20),
 
           // OTHER ACCOUNTS LINKED

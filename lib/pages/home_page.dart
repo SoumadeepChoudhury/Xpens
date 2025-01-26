@@ -20,21 +20,32 @@ class HomePage extends StatelessWidget {
                 child: Row(
               // mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  Icons.person_2_outlined,
-                  size: home_page_profile_icon_size,
+                Container(
+                  width: 50,
+                  height: 50,
+                  decoration: BoxDecoration(
+                      color: Colors.white70,
+                      borderRadius: BorderRadius.circular(50)),
+                  child: Icon(
+                    Icons.person_2_outlined,
+                    size: home_page_profile_icon_size,
+                    color: Colors.black,
+                  ),
                 ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Good morning, Soumadeep!",
-                      style: TextStyle(
-                          fontSize: home_page_profile_text_size,
-                          fontWeight: FontWeight.bold),
-                    ),
-                    Text("Spend Wisely, Save Smartly.")
-                  ],
+                Padding(
+                  padding: const EdgeInsets.only(left: 12.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Good morning, Soumadeep!",
+                        style: TextStyle(
+                            fontSize: home_page_profile_text_size,
+                            fontWeight: FontWeight.bold),
+                      ),
+                      Text("Spend Wisely, Save Smartly.")
+                    ],
+                  ),
                 ),
               ],
             )),
@@ -90,7 +101,7 @@ class HomePage extends StatelessWidget {
                               color: Colors.deepPurple[300],
                             ),
                             Text(
-                              "11,987.28",
+                              balance_amount,
                               style: TextStyle(
                                   fontSize: balance_value_text_size,
                                   fontWeight: FontWeight.bold,

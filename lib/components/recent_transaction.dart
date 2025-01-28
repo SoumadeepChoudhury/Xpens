@@ -7,12 +7,14 @@ class RecentTransaction extends StatelessWidget {
       required this.icon,
       required this.title,
       required this.category,
-      required this.amount});
+      required this.amount,
+      required this.isReceived});
 
   final IconData icon;
   final String title;
   final String category;
   final String amount;
+  final bool isReceived;
 
   @override
   Widget build(BuildContext context) {
@@ -59,16 +61,22 @@ class RecentTransaction extends StatelessWidget {
           Row(
             children: [
               Text(
-                "-",
-                style: TextStyle(color: amount_deducted_color, fontSize: 20),
+                isReceived ? "+" : "-",
+                style: TextStyle(
+                    color:
+                        isReceived ? amount_added_color : amount_deducted_color,
+                    fontSize: 20),
               ),
               Icon(
                 Icons.currency_rupee,
-                color: amount_deducted_color,
+                color: isReceived ? amount_added_color : amount_deducted_color,
               ),
               Text(
                 amount,
-                style: TextStyle(color: amount_deducted_color, fontSize: 20),
+                style: TextStyle(
+                    color:
+                        isReceived ? amount_added_color : amount_deducted_color,
+                    fontSize: 20),
               ),
             ],
           )

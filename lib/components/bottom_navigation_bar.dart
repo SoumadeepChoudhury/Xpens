@@ -31,13 +31,17 @@ class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar> {
           if (details.velocity.pixelsPerSecond.dx > 1000) {
             setState(() {
               if (currentPageIndex > 0) {
-                currentPageIndex -= 1;
+                if (isAccountAdded) {
+                  currentPageIndex -= 1;
+                }
               }
             });
           } else if (details.velocity.pixelsPerSecond.dx < -1000) {
             setState(() {
               if (currentPageIndex != _pages.length - 1) {
-                currentPageIndex += 1;
+                if (isAccountAdded) {
+                  currentPageIndex += 1;
+                }
               }
             });
           }
@@ -129,7 +133,9 @@ class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar> {
       ),
       onTap: () {
         setState(() {
-          currentPageIndex = index;
+          if (isAccountAdded) {
+            currentPageIndex = index;
+          }
         });
       },
     );

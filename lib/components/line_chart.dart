@@ -1,8 +1,11 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:xpens/variables.dart';
 
 class LineChartComponent extends StatelessWidget {
-  const LineChartComponent({super.key});
+  const LineChartComponent({super.key, required this.data});
+
+  final Map<String, double> data;
 
   @override
   Widget build(BuildContext context) {
@@ -16,17 +19,8 @@ class LineChartComponent extends StatelessWidget {
                   sideTitles: SideTitles(
                 showTitles: true,
                 getTitlesWidget: (value, meta) {
-                  if (meta.formattedValue == "1") {
-                    return Text("Food");
-                  } else if (meta.formattedValue == "2") {
-                    return Text("Grocery");
-                  } else if (meta.formattedValue == "3") {
-                    return Text("Education");
-                  } else if (meta.formattedValue == "4") {
-                    return Text("Sports");
-                  } else {
-                    return Text("");
-                  }
+                  return Text(
+                      favourite_components[int.parse(meta.formattedValue)]);
                 },
               )),
               topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
@@ -43,12 +37,11 @@ class LineChartComponent extends StatelessWidget {
                     gradient: LinearGradient(
                             colors: [Colors.lightBlue, Colors.deepPurpleAccent])
                         .withOpacity(0.4)),
-                spots: [
-                  FlSpot(1, 1000),
-                  FlSpot(2, 2000),
-                  FlSpot(3, 400),
-                  FlSpot(4, 700),
-                ])
+                spots: favourite_components
+                    .map((item) => FlSpot(
+                        favourite_components.indexOf(item) * 1.0,
+                        data[item] ?? 0))
+                    .toList())
           ])),
     );
   }

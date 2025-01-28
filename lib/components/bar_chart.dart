@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:xpens/variables.dart';
 
 class BarChartComponent extends StatelessWidget {
-  const BarChartComponent({super.key});
+  const BarChartComponent({super.key, required this.data});
+
+  final Map<String, double> data;
 
   @override
   Widget build(BuildContext context) {
@@ -13,44 +16,25 @@ class BarChartComponent extends StatelessWidget {
                 sideTitles: SideTitles(
               showTitles: true,
               getTitlesWidget: (value, meta) {
-                if (meta.formattedValue == "0") {
-                  return Text("Food");
-                } else {
-                  return Text("Sports");
-                }
+                return Text(
+                  favourite_components[int.parse(meta.formattedValue)],
+                  overflow: TextOverflow.ellipsis,
+                );
               },
             )),
             topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
             rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false))),
-        barGroups: [
-          BarChartGroupData(x: 0, barRods: [
-            BarChartRodData(
-                toY: 400,
-                width: 15,
-                borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(6), topRight: Radius.circular(6))),
-          ]),
-          BarChartGroupData(x: 1, barRods: [
-            BarChartRodData(
-                toY: 400,
-                width: 15,
-                borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(6), topRight: Radius.circular(6))),
-          ]),
-          BarChartGroupData(x: 2, barRods: [
-            BarChartRodData(
-                toY: 400,
-                width: 15,
-                borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(6), topRight: Radius.circular(6))),
-          ]),
-          BarChartGroupData(x: 3, barRods: [
-            BarChartRodData(
-                toY: 400,
-                width: 15,
-                borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(6), topRight: Radius.circular(6))),
-          ]),
-        ]));
+        barGroups: favourite_components
+            .map((item) => BarChartGroupData(
+                    x: favourite_components.indexOf(item),
+                    barRods: [
+                      BarChartRodData(
+                          toY: data[item] ?? 0,
+                          width: 30,
+                          borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(6),
+                              topRight: Radius.circular(6)))
+                    ]))
+            .toList()));
   }
 }

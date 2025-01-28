@@ -1,11 +1,112 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:xpens/components/favourite_component.dart';
 import 'package:xpens/components/recent_transaction.dart';
 import 'package:xpens/components/recent_transaction_date.dart';
+import 'package:xpens/utils/card_model.dart';
+import 'package:xpens/utils/database.dart';
+import 'package:xpens/utils/functions.dart';
+import 'package:xpens/utils/transaction_model.dart';
 import 'package:xpens/variables.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  File? _selectedImage = null;
+
+  bool accountIsChangedfromDropdown = false;
+  String selectedAccount = "";
+  String selectedAccountCardNo = "";
+  double balanceAmount = 0.0;
+  String date = "";
+
+  final ScrollController _scrollController = ScrollController();
+  int noOfTransactionsToBeShown = 4;
+
+  List<AccountCard> accounts = [];
+  List<AccountTransaction> transactionsList = [];
+
+  DatabaseService db = DatabaseService.instance;
+
+  addTransaction(String title, String category, String mode, double amount) {
+    DatabaseService _db_new = DatabaseService.instance;
+    _db_new.addNewTransaction(transactionTableName,
+        date: dateToday,
+        cardNo: selectedAccountCardNo,
+        title: title,
+        category: category,
+        mode: mode,
+        amount: amount);
+    if (mode == "Transferred") {
+      balanceAmount -= amount;
+    } else {
+      balanceAmount += amount;
+    }
+
+    db.updateBalance(selectedAccountCardNo, balanceAmount);
+
+    date = "";
+    updateRecentTransactions();
+    setState(() {
+      date = "";
+    });
+  }
+
+  updateRecentTransactions() {
+    if (transactionTableName.isNotEmpty) {
+      db
+          .fetchTransactions(transactionTableName, selectedAccountCardNo)
+          .then((val) {
+        transactionsList.clear();
+        for (var item in val) {
+          transactionsList.add(item);
+        }
+        setState(() {
+          date = "";
+        });
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    date = "";
+
+    _selectedImage = File(profile_url);
+
+    db.fetchAccounts().then((val) {
+      accounts = val;
+      balanceAmount = getBalanceFromTitle(accounts);
+      selectedAccountCardNo = getCardNoFromTitle(accounts);
+      for (var card in val) {
+        if (card.cardNo == selectedAccountCardNo) {
+          transactionTableName = "${card.title}$selectedAccountCardNo";
+        }
+      }
+
+      updateRecentTransactions();
+      setState(() {
+        date = "";
+      });
+    });
+
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels ==
+          _scrollController.position.maxScrollExtent) {
+        setState(() {
+          date = "";
+          noOfTransactionsToBeShown += 5;
+        });
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,11 +127,19 @@ class HomePage extends StatelessWidget {
                   decoration: BoxDecoration(
                       color: Colors.white70,
                       borderRadius: BorderRadius.circular(50)),
-                  child: Icon(
-                    Icons.person_2_outlined,
-                    size: home_page_profile_icon_size,
-                    color: Colors.black,
-                  ),
+                  child: profile_url.isNotEmpty
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(50),
+                          child: Image.file(
+                            _selectedImage ?? File(profile_url),
+                            fit: BoxFit.fill,
+                          ),
+                        )
+                      : Icon(
+                          Icons.person_2_outlined,
+                          size: home_page_profile_icon_size,
+                          color: Colors.black,
+                        ),
                 ),
                 Padding(
                   padding: const EdgeInsets.only(left: 12.0),
@@ -38,7 +147,7 @@ class HomePage extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Good morning, Soumadeep!",
+                        "Good morning, ${getNameFromUsername()}!",
                         style: TextStyle(
                             fontSize: home_page_profile_text_size,
                             fontWeight: FontWeight.bold),
@@ -69,24 +178,55 @@ class HomePage extends StatelessWidget {
                                 color: Colors.white70),
                           ),
                           Spacer(),
-                          DropdownButton<String>(
-                              value: "Savings",
-                              icon: Icon(
-                                Icons.arrow_drop_down_outlined,
-                                color: Colors.white70,
-                              ),
-                              elevation: 16,
-                              style: TextStyle(
-                                  color: Colors.white70,
-                                  fontWeight: FontWeight.w700),
-                              underline: SizedBox.shrink(),
-                              onChanged: (String? newValue) {},
-                              items: [
-                                DropdownMenuItem(
-                                    value: "Savings", child: Text("Savings")),
-                                DropdownMenuItem(
-                                    value: "UPI Lite", child: Text("UPI Lite"))
-                              ]),
+                          FutureBuilder<List<AccountCard>>(
+                              future: db.fetchAccounts(),
+                              builder: (context, snapshot) {
+                                if (snapshot.hasData) {
+                                  String initialVal = "";
+                                  if (!accountIsChangedfromDropdown) {
+                                    for (var card in snapshot.data!) {
+                                      if (card.isPrimary == "Yes") {
+                                        initialVal = card.title;
+                                      }
+                                    }
+                                  }
+                                  return DropdownButton(
+                                      value: accountIsChangedfromDropdown
+                                          ? selectedAccount
+                                          : initialVal,
+                                      icon: Icon(
+                                        Icons.arrow_drop_down_outlined,
+                                        color: Colors.white70,
+                                      ),
+                                      elevation: 16,
+                                      style: TextStyle(
+                                          color: Colors.white70,
+                                          fontWeight: FontWeight.w700),
+                                      underline: SizedBox.shrink(),
+                                      onChanged: (val) {
+                                        setState(() {
+                                          accountIsChangedfromDropdown = true;
+                                          selectedAccount = val!;
+                                          balanceAmount = getBalanceFromTitle(
+                                              accounts,
+                                              title: selectedAccount);
+                                          selectedAccountCardNo =
+                                              getCardNoFromTitle(accounts,
+                                                  title: selectedAccount);
+                                          transactionTableName =
+                                              "$selectedAccount$selectedAccountCardNo";
+                                          updateRecentTransactions();
+                                        });
+                                      },
+                                      items: [
+                                        for (var card in snapshot.data!)
+                                          DropdownMenuItem(
+                                              value: card.title,
+                                              child: Text(card.title)),
+                                      ]);
+                                }
+                                return CircularProgressIndicator();
+                              }),
                         ],
                       ),
                       SizedBox(
@@ -97,13 +237,13 @@ class HomePage extends StatelessWidget {
                           children: [
                             Icon(
                               Icons.currency_rupee_sharp,
-                              size: balance_value_text_size,
+                              size: 40,
                               color: Colors.deepPurple[300],
                             ),
                             Text(
-                              balance_amount,
+                              getFormattedAmount(balanceAmount),
                               style: TextStyle(
-                                  fontSize: balance_value_text_size,
+                                  fontSize: 40,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.deepPurple[300]),
                             ),
@@ -115,7 +255,7 @@ class HomePage extends StatelessWidget {
                           SizedBox(
                             width: 10,
                           ),
-                          Text("January 23, 2025"),
+                          Text(dateToday),
                         ],
                       )
                     ])),
@@ -140,26 +280,17 @@ class HomePage extends StatelessWidget {
                     scrollDirection: Axis.horizontal,
                     child: Row(
                       children: [
-                        FavouriteCategory(
-                          icon: Icons.fastfood,
-                          label: "Food",
-                        ),
-                        FavouriteCategory(
-                          icon: Icons.local_grocery_store,
-                          label: "Grocery",
-                        ),
-                        FavouriteCategory(
-                          icon: Icons.book,
-                          label: "Education",
-                        ),
-                        FavouriteCategory(
-                          icon: Icons.sports_tennis,
-                          label: "Sports",
-                        ),
+                        for (var component in favourite_components)
+                          FavouriteCategory(
+                            icon: iconsWithLabels[component],
+                            label: component,
+                            addTransaction: addTransaction,
+                          ),
                         FavouriteCategory(
                           icon: Icons.add,
                           label: "Add",
                           isAddButton: true,
+                          addTransaction: addTransaction,
                         ),
                       ],
                     ),
@@ -185,41 +316,56 @@ class HomePage extends StatelessWidget {
                   ),
                   SizedBox(
                     height: MediaQuery.of(context).size.height * 0.22,
-                    child: SingleChildScrollView(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          RecentTransactionDate(label: "Today"),
-                          RecentTransaction(
-                            icon: Icons.fastfood,
-                            title: "Lunch",
-                            category: "Food",
-                            amount: "100.00",
+                    child: transactionsList.isNotEmpty
+                        ? SingleChildScrollView(
+                            controller: _scrollController,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                ...transactionsList
+                                    .take(noOfTransactionsToBeShown)
+                                    .map((transaction) {
+                                  if (transaction.date != date) {
+                                    date = transaction.date;
+                                    return Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        RecentTransactionDate(
+                                            label: date == dateToday
+                                                ? "Today"
+                                                : date),
+                                        RecentTransaction(
+                                          icon: iconsWithLabels[
+                                              transaction.category],
+                                          title: transaction.title,
+                                          category: transaction.category,
+                                          amount: getFormattedAmount(
+                                              transaction.amount),
+                                          isReceived: transaction.isReceived,
+                                        ),
+                                      ],
+                                    );
+                                  } else {
+                                    return RecentTransaction(
+                                      icon:
+                                          iconsWithLabels[transaction.category],
+                                      title: transaction.title,
+                                      category: transaction.category,
+                                      amount: getFormattedAmount(
+                                          transaction.amount),
+                                      isReceived: transaction.isReceived,
+                                    );
+                                  }
+                                }).expand((widget) => widget is Column
+                                        ? widget.children
+                                        : [widget])
+                              ],
+                            ))
+                        : Text(
+                            "No Transaction Record found...",
+                            style: TextStyle(color: Colors.white70),
                           ),
-                          Divider(),
-                          RecentTransaction(
-                            icon: Icons.fastfood,
-                            title: "Lunch",
-                            category: "Food",
-                            amount: "100.00",
-                          ),
-                          RecentTransactionDate(label: "January 22, 2025"),
-                          RecentTransaction(
-                            icon: Icons.fastfood,
-                            title: "Lunch",
-                            category: "Food",
-                            amount: "100.00",
-                          ),
-                          Divider(),
-                          RecentTransaction(
-                            icon: Icons.fastfood,
-                            title: "Lunch",
-                            category: "Food",
-                            amount: "100.00",
-                          ),
-                        ],
-                      ),
-                    ),
                   )
                 ],
               ),

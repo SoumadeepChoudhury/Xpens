@@ -1,12 +1,43 @@
 import 'package:flutter/material.dart';
-import 'package:xpens/components/bar_chart.dart';
-import 'package:xpens/components/custom_button_group_selection_month_week_etc.dart';
-import 'package:xpens/components/line_chart.dart';
-import 'package:xpens/components/pie_chart.dart';
-import 'package:xpens/variables.dart';
 
-class AnalysisPage extends StatelessWidget {
+import 'package:xpens/components/custom_button_group_selection_month_week_etc.dart';
+
+import 'package:xpens/utils/card_model.dart';
+import 'package:xpens/utils/database.dart';
+import 'package:xpens/utils/functions.dart';
+import 'package:xpens/utils/graph_handlers.dart';
+
+class AnalysisPage extends StatefulWidget {
   const AnalysisPage({super.key});
+
+  @override
+  State<AnalysisPage> createState() => _AnalysisPageState();
+}
+
+class _AnalysisPageState extends State<AnalysisPage> {
+  final DatabaseService db = DatabaseService.instance;
+  String selectedAccount = "";
+  String selectedAccountCardNo = "";
+  double balanceAmount = 0.0;
+  List<AccountCard> accountList = [];
+  String selectedLabel = "Month";
+  String selectedGraphType = 'line';
+
+  @override
+  void initState() {
+    super.initState();
+    db.fetchAccounts().then((accountsList) {
+      for (var account in accountsList) {
+        if (account.isPrimary == "Yes") {
+          balanceAmount = account.balance;
+          selectedAccount = account.title;
+          selectedAccountCardNo = account.cardNo;
+        }
+      }
+      accountList.addAll(accountsList);
+      setState(() {});
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,8 +58,9 @@ class AnalysisPage extends StatelessWidget {
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
                 Spacer(),
-                DropdownButton<String>(
-                    value: "Savings",
+                DropdownButton(
+                    value: selectedAccount,
+                    hint: Text("Accounts"),
                     icon: Icon(
                       Icons.arrow_drop_down_outlined,
                       color: Colors.white70,
@@ -37,13 +69,24 @@ class AnalysisPage extends StatelessWidget {
                     style: TextStyle(
                         color: Colors.white70, fontWeight: FontWeight.w700),
                     underline: SizedBox.shrink(),
-                    onChanged: (String? newValue) {},
+                    onChanged: (val) {
+                      setState(() {
+                        selectedAccount = val!;
+                        for (var account in accountList) {
+                          if (account.title == selectedAccount) {
+                            balanceAmount = account.balance;
+                            selectedAccountCardNo = account.cardNo;
+                          }
+                        }
+                      });
+                    },
                     items: [
-                      DropdownMenuItem(
-                          value: "Savings", child: Text("Savings")),
-                      DropdownMenuItem(
-                          value: "UPI Lite", child: Text("UPI Lite"))
-                    ]),
+                      for (var acc in accountList)
+                        DropdownMenuItem(
+                          child: Text(acc.title),
+                          value: acc.title,
+                        )
+                    ])
               ],
             ),
             Padding(
@@ -59,7 +102,7 @@ class AnalysisPage extends StatelessWidget {
                         size: 40,
                       ),
                       Text(
-                        balance_amount,
+                        getFormattedAmount(balanceAmount),
                         style: TextStyle(
                             fontSize: 40, fontWeight: FontWeight.bold),
                       )
@@ -76,13 +119,41 @@ class AnalysisPage extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                SelectionButton(label: "Week"),
+                SelectionButton(
+                  label: "Week",
+                  isSelected: selectedLabel == "Week",
+                  onTap: () {
+                    setState(() {
+                      selectedLabel = "Week";
+                    });
+                  },
+                ),
                 SelectionButton(
                   label: "Month",
-                  isSelected: true,
+                  isSelected: selectedLabel == "Month",
+                  onTap: () {
+                    setState(() {
+                      selectedLabel = "Month";
+                    });
+                  },
                 ),
-                SelectionButton(label: "6 Months"),
-                SelectionButton(label: "Year"),
+                SelectionButton(
+                    label: "6 Months",
+                    isSelected: selectedLabel == "6 Months",
+                    onTap: () {
+                      setState(() {
+                        selectedLabel = "6 Months";
+                      });
+                    }),
+                SelectionButton(
+                  label: "Year",
+                  isSelected: selectedLabel == "Year",
+                  onTap: () {
+                    setState(() {
+                      selectedLabel = "Year";
+                    });
+                  },
+                ),
               ],
             ),
             Row(
@@ -93,7 +164,7 @@ class AnalysisPage extends StatelessWidget {
                 ),
                 Spacer(),
                 DropdownButton<String>(
-                    value: "line",
+                    value: selectedGraphType,
                     icon: Icon(
                       Icons.arrow_drop_down_outlined,
                       color: Colors.white70,
@@ -102,7 +173,11 @@ class AnalysisPage extends StatelessWidget {
                     style: TextStyle(
                         color: Colors.white70, fontWeight: FontWeight.w700),
                     underline: SizedBox.shrink(),
-                    onChanged: (String? newValue) {},
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        selectedGraphType = newValue!;
+                      });
+                    },
                     items: [
                       DropdownMenuItem(value: "bar", child: Text("Bar Graph")),
                       DropdownMenuItem(
@@ -111,10 +186,19 @@ class AnalysisPage extends StatelessWidget {
                     ]),
               ],
             ),
-            Container(
-                margin: EdgeInsets.only(top: 12),
-                height: 300,
-                child: LineChartComponent())
+            if (selectedAccount.isEmpty)
+              Center(child: CircularProgressIndicator.adaptive()),
+            if (selectedAccount.isNotEmpty)
+              Container(
+                  margin: EdgeInsets.only(top: 12),
+                  height: 300,
+                  child: Graph(
+                    key: ValueKey(selectedAccount),
+                    selectedGraphType: selectedGraphType,
+                    tableName: getTransactionTableName(
+                        selectedAccountCardNo, selectedAccount),
+                    selectedlabel: selectedLabel,
+                  ))
           ],
         ),
       ),

@@ -1,8 +1,18 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:xpens/variables.dart';
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
+
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  File _selectedImage = File(profile_url);
 
   @override
   Widget build(BuildContext context) {
@@ -17,9 +27,18 @@ class ProfilePage extends StatelessWidget {
             SizedBox(height: 20),
             Row(
               children: [
-                GestureDetector(
-                  onTap: () {
-                    //Upload profile Pic
+                InkWell(
+                  onTap: () async {
+                    final image = await ImagePicker()
+                        .pickImage(source: ImageSource.gallery);
+                    if (image != null) {
+                      fileManager.copyFile(
+                          image.path, "${directoryPath}profile.jpg");
+                      setState(() {
+                        _selectedImage = File(image.path);
+                        profile_url = "${directoryPath}profile.jpg";
+                      });
+                    }
                   },
                   child: Container(
                     width: 70,
@@ -27,14 +46,22 @@ class ProfilePage extends StatelessWidget {
                     decoration: BoxDecoration(
                         color: Colors.white70,
                         borderRadius: BorderRadius.circular(50)),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Icon(
-                        Icons.person_2_outlined,
-                        size: 50,
-                        color: Colors.black,
-                      ),
-                    ),
+                    child: profile_url.isNotEmpty
+                        ? ClipRRect(
+                            borderRadius: BorderRadius.circular(50),
+                            child: Image.file(
+                              _selectedImage,
+                              fit: BoxFit.fill,
+                            ),
+                          )
+                        : Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Icon(
+                              Icons.person_2_outlined,
+                              size: 50,
+                              color: Colors.black,
+                            ),
+                          ),
                   ),
                 ),
                 Padding(
@@ -44,12 +71,16 @@ class ProfilePage extends StatelessWidget {
                     children: [
                       Text(
                         userName,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize:
                                 MediaQuery.of(context).size.width * 0.065),
                       ),
-                      Text(email)
+                      Text(
+                        email,
+                        overflow: TextOverflow.ellipsis,
+                      )
                     ],
                   ),
                 )

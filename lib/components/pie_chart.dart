@@ -1,42 +1,39 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:xpens/variables.dart';
 
 class PieChartComponent extends StatelessWidget {
-  const PieChartComponent({super.key});
+  PieChartComponent({super.key, required this.data});
+
+  final Map<String, double> data;
+  List<String> percentageTitles = [];
 
   @override
   Widget build(BuildContext context) {
-    return PieChart(
-        PieChartData(centerSpaceRadius: 0, sectionsSpace: 5, sections: [
-      PieChartSectionData(
-          value: 1000,
-          radius: 101.0,
-          title: "25%",
-          titleStyle: TextStyle(fontWeight: FontWeight.bold),
-          badgeWidget: CustomBadge(icon: Icons.fastfood),
-          badgePositionPercentageOffset: 0.98),
-      PieChartSectionData(
-          value: 2000,
-          radius: 106.0,
-          title: "50%",
-          titleStyle: TextStyle(fontWeight: FontWeight.bold),
-          badgeWidget: CustomBadge(icon: Icons.sports_tennis),
-          badgePositionPercentageOffset: 0.98),
-      PieChartSectionData(
-          value: 400,
-          radius: 111.0,
-          title: "10%",
-          titleStyle: TextStyle(fontWeight: FontWeight.bold),
-          badgeWidget: CustomBadge(icon: Icons.book),
-          badgePositionPercentageOffset: 0.98),
-      PieChartSectionData(
-          value: 600,
-          radius: 116.0,
-          title: "15%",
-          titleStyle: TextStyle(fontWeight: FontWeight.bold),
-          badgeWidget: CustomBadge(icon: Icons.local_grocery_store),
-          badgePositionPercentageOffset: 0.98),
-    ]));
+    double total = 0;
+    for (var val in data.values) {
+      total += val;
+    }
+    for (var val in data.values) {
+      double percent = val / total * 100;
+      String perct = percent.toString();
+      percentageTitles
+          .add("${perct.substring(0, perct.length > 5 ? 5 : perct.length)}%");
+    }
+    return PieChart(PieChartData(
+        centerSpaceRadius: 0,
+        sectionsSpace: 5,
+        sections: favourite_components
+            .map((item) => PieChartSectionData(
+                value: data[item] ?? 0,
+                radius: 100 + favourite_components.indexOf(item) + 1,
+                title: percentageTitles.length == favourite_components.length
+                    ? percentageTitles[favourite_components.indexOf(item)]
+                    : "",
+                titleStyle: TextStyle(fontWeight: FontWeight.bold),
+                badgeWidget: CustomBadge(icon: iconsWithLabels[item]),
+                badgePositionPercentageOffset: 0.98))
+            .toList()));
   }
 }
 

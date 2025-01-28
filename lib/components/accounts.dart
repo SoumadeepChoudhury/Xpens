@@ -1,10 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:xpens/utils/database.dart';
 
 class Accounts extends StatelessWidget {
-  const Accounts({super.key, required this.title, this.isPrimary = false});
+  Accounts(
+      {super.key,
+      required this.title,
+      required this.card_no,
+      required this.onUpdate,
+      required this.oldPrimaryCardNo,
+      this.isPrimary = false});
 
   final String title;
   final bool isPrimary;
+  final String card_no;
+  final Function onUpdate;
+  final String oldPrimaryCardNo;
+
+  final DatabaseService db = DatabaseService.instance;
 
   @override
   Widget build(BuildContext context) {
@@ -36,17 +48,27 @@ class Accounts extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                       fontSize: 20),
                 ),
-                if (isPrimary)
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                    decoration: BoxDecoration(
-                        color: Colors.green.shade100,
-                        borderRadius: BorderRadius.circular(12)),
-                    child: Text(
-                      "Primary",
-                      style: TextStyle(color: Colors.black, fontSize: 10),
+                Row(
+                  children: [
+                    Text(
+                      "xxxxxxxx$card_no",
+                      style: TextStyle(color: Colors.black),
                     ),
-                  )
+                    SizedBox(width: 10),
+                    if (isPrimary)
+                      Container(
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                        decoration: BoxDecoration(
+                            color: Colors.green.shade100,
+                            borderRadius: BorderRadius.circular(12)),
+                        child: Text(
+                          "Primary",
+                          style: TextStyle(color: Colors.black, fontSize: 10),
+                        ),
+                      )
+                  ],
+                )
               ],
             ),
             Spacer(),
@@ -54,9 +76,24 @@ class Accounts extends StatelessWidget {
               icon: Icon(Icons.more_horiz, size: 30, color: Colors.black),
               onSelected: (value) {
                 if (value == 'make_primary') {
-                  print("MP: $title");
+                  db.updatePrimaryAccount(oldPrimaryCardNo, card_no);
+                  onUpdate();
                 } else if (value == 'delete') {
-                  print("D $title");
+                  if (isPrimary) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        behavior: SnackBarBehavior.floating,
+                        content: Text(
+                          "Can't delete when the account is Primary. In order to delete, make other account primary and then delete this account.",
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        duration: Duration(seconds: 4),
+                      ),
+                    );
+                  } else {
+                    db.deleteAccount(card_no);
+                    onUpdate();
+                  }
                 }
               },
               itemBuilder: (BuildContext context) => [

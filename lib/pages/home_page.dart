@@ -79,7 +79,7 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     date = "";
 
-    _selectedImage = File(profile_url);
+    _selectedImage = profile_url.isNotEmpty ? File(profile_url) : null;
 
     db.fetchAccounts().then((val) {
       accounts = val;
@@ -125,32 +125,42 @@ class _HomePageState extends State<HomePage> {
                   width: 50,
                   height: 50,
                   decoration: BoxDecoration(
-                      color: Colors.white70,
-                      borderRadius: BorderRadius.circular(50)),
-                  child: profile_url.isNotEmpty
-                      ? ClipRRect(
-                          borderRadius: BorderRadius.circular(50),
-                          child: Image.file(
-                            _selectedImage ?? File(profile_url),
-                            fit: BoxFit.fill,
+                      borderRadius: BorderRadius.circular(50),
+                      color: Colors.white70),
+                  child: Center(
+                    child: _selectedImage != null
+                        ? ClipRRect(
+                            borderRadius: BorderRadius.circular(50),
+                            child: Image.file(
+                              width: 50,
+                              height: 50,
+                              _selectedImage!,
+                              fit: BoxFit.fill,
+                            ),
+                          )
+                        : Text(
+                            userName.substring(0, 1).toUpperCase(),
+                            style: TextStyle(
+                                color: Colors.black.withValues(alpha: 0.5),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 20),
                           ),
-                        )
-                      : Icon(
-                          Icons.person_2_outlined,
-                          size: home_page_profile_icon_size,
-                          color: Colors.black,
-                        ),
+                  ),
                 ),
                 Padding(
                   padding: const EdgeInsets.only(left: 12.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        "Good morning, ${getNameFromUsername()}!",
-                        style: TextStyle(
-                            fontSize: home_page_profile_text_size,
-                            fontWeight: FontWeight.bold),
+                      Container(
+                        width: MediaQuery.of(context).size.width - 100,
+                        child: Text(
+                          "${getMsgFromTimeofday()}, ${getNameFromUsername()}!",
+                          style: TextStyle(
+                              fontSize: home_page_profile_text_size,
+                              fontWeight: FontWeight.bold,
+                              overflow: TextOverflow.ellipsis),
+                        ),
                       ),
                       Text("Spend Wisely, Save Smartly.")
                     ],

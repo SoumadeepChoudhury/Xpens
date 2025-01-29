@@ -26,6 +26,9 @@ class _WelcomeDataComponentState extends State<WelcomeDataComponent> {
               ? EntryField(_counter == 0 ? "name" : "email")
               : ProfileImage(),
         ),
+        _counter == 2
+            ? Text("Add your profile picture by cliking above.")
+            : SizedBox(),
         SizedBox(height: 50),
         Container(
           padding: EdgeInsets.only(right: 20),

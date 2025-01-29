@@ -3,7 +3,11 @@ import 'package:xpens/utils/transaction_model.dart';
 import 'package:xpens/variables.dart';
 
 getNameFromUsername() {
-  return userName.substring(0, userName.indexOf(" "));
+  if (userName.contains(" ")) {
+    return userName.substring(0, userName.indexOf(" "));
+  } else {
+    return userName;
+  }
 }
 
 getDate(var now) {
@@ -127,4 +131,25 @@ List<AccountTransaction> getFilteredList(
     filteredList.add(acc);
   }
   return filteredList;
+}
+
+getMsgFromTimeofday() {
+  String dt = DateTime.now().toString();
+  String ft = dt.substring(11);
+  // String time = ft.substring(0, ft.indexOf(".") - 3); //19:48
+  String time = "00:01";
+
+  final msgs = ["Good Morning", "Good Afternoon", "Good Evening"];
+  int hr = int.parse(time.substring(0, time.indexOf(":")));
+  int min = int.parse(time.substring(time.indexOf(":") + 1));
+
+  List<int> setHr = [12, 16, 24];
+  List<int> setMin = [0, 30, 0];
+
+  for (int i = 0; i < msgs.length; i++) {
+    if (hr == setHr[i] ? min <= setMin[i] : hr <= setHr[i]) {
+      return msgs[i];
+    }
+  }
+  return "";
 }

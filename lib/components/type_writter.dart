@@ -47,11 +47,12 @@ class _TypeWritterState extends State<TypeWritter> {
     //Cancelling the timer
     timer.cancel();
 
-    //TODO: Creating the JSON file and writing it
+    // Creating the JSON file and writing it
     jsonData = {
       "name": userName,
       "email": email,
-      "profile_url": "${directoryPath}profile.jpg",
+      "profile_url":
+          profile_url.isNotEmpty ? "${directoryPath}profile.jpg" : "",
     };
 
     fileManager.writeJsonFile(jsonData, directoryPath!, "profile.json");

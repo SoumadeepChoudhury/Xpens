@@ -109,6 +109,7 @@ class DatabaseService {
   void createTransactionTable(String tableName) async {
     final db = await database;
     tableName = tableName.replaceAll("-", "_");
+    tableName = tableName.replaceAll(" ", "_");
     db.execute('''
   CREATE TABLE $tableName(
     $transactionTableSlNoColumnName INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -132,6 +133,7 @@ class DatabaseService {
       required double amount}) async {
     final db = await database;
     tableName = tableName.replaceAll("-", "_");
+    tableName = tableName.replaceAll(" ", "_");
     db.insert(tableName, {
       transactionTableDateColumnName: date,
       transactionTableCardNoColumnName: cardNo,
@@ -147,6 +149,7 @@ class DatabaseService {
       String tableName, String cardNo) async {
     final db = await database;
     tableName = tableName.replaceAll("-", "_");
+    tableName = tableName.replaceAll(" ", "_");
     final data = await db.query(tableName,
         where: '$transactionTableCardNoColumnName = ?',
         whereArgs: [
@@ -169,6 +172,7 @@ class DatabaseService {
       String tableName, String fieldValue) async {
     final db = await database;
     tableName = tableName.replaceAll("-", "_");
+    tableName = tableName.replaceAll(" ", "_");
     final data = await db.query(tableName,
         where: '$transactionTableCategoryColumnName = ?',
         whereArgs: [
@@ -190,6 +194,7 @@ class DatabaseService {
   void deleteTransactionTable(String tableName) async {
     final db = await database;
     tableName = tableName.replaceAll("-", "_");
+    tableName = tableName.replaceAll(" ", "_");
     db.delete(tableName);
   }
 }

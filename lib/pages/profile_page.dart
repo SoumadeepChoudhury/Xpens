@@ -147,7 +147,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   borderRadius: BorderRadius.circular(12)),
               child: Column(
                 children: [
-                  settingsMenuItem("Version", "v1.0.0"),
+                  settingsMenuItem("Version", "v$VERSION"),
                   SizedBox(height: 20),
                   supportMenuItem("Terms & Condition"),
                   SizedBox(height: 20),

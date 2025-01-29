@@ -136,8 +136,7 @@ List<AccountTransaction> getFilteredList(
 getMsgFromTimeofday() {
   String dt = DateTime.now().toString();
   String ft = dt.substring(11);
-  // String time = ft.substring(0, ft.indexOf(".") - 3); //19:48
-  String time = "00:01";
+  String time = ft.substring(0, ft.indexOf(".") - 3); //19:48
 
   final msgs = ["Good Morning", "Good Afternoon", "Good Evening"];
   int hr = int.parse(time.substring(0, time.indexOf(":")));

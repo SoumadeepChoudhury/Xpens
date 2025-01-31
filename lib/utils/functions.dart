@@ -1,3 +1,5 @@
+import 'package:android_intent_plus/android_intent.dart';
+import 'package:android_intent_plus/flag.dart';
 import 'package:xpens/utils/card_model.dart';
 import 'package:xpens/utils/transaction_model.dart';
 import 'package:xpens/variables.dart';
@@ -151,4 +153,35 @@ getMsgFromTimeofday() {
     }
   }
   return "";
+}
+
+void openUPIPayment({
+  required double amount,
+  required String title,
+  String upiid = "",
+  String payeename = "",
+  String qrData = "",
+}) async {
+  AndroidIntent? intent;
+  if (qrData.isNotEmpty) {
+    intent = AndroidIntent(
+      action: 'android.intent.action.VIEW',
+      data: "$qrData&am=$amount&cu=INR&tn=$title",
+      flags: [Flag.FLAG_ACTIVITY_NEW_TASK],
+    );
+  } else if (upiid.isNotEmpty) {
+    intent = AndroidIntent(
+      action: 'android.intent.action.VIEW',
+      data: "upi://pay?pa=$upiid&pn=$payeename&am=$amount&cu=INR&tn=$title",
+      flags: [Flag.FLAG_ACTIVITY_NEW_TASK],
+    );
+  }
+  if (intent != null) {
+    await intent.launch();
+  }
+}
+
+bool isValidDecimal(String input) {
+  final RegExp regex = RegExp(r'^\d+(\.\d+)?$');
+  return regex.hasMatch(input);
 }

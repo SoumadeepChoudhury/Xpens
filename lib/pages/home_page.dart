@@ -18,7 +18,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  File? _selectedImage = null;
+  File? _selectedImage;
 
   bool accountIsChangedfromDropdown = false;
   String selectedAccount = "";
@@ -64,7 +64,7 @@ class _HomePageState extends State<HomePage> {
           .fetchTransactions(transactionTableName, selectedAccountCardNo)
           .then((val) {
         transactionsList.clear();
-        for (var item in val) {
+        for (var item in val.reversed) {
           transactionsList.add(item);
         }
         setState(() {

@@ -76,6 +76,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
+    checkUpdate(context);
     super.initState();
     date = "";
 

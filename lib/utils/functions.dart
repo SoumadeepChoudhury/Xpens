@@ -207,10 +207,19 @@ bool isValidDecimal(String input) {
 }
 
 void checkUpdate(BuildContext context) async {
-  File file = File("$directoryPath/app-release-v$VERSION.apk");
+  String path = "/storage/emulated/0/Download";
+  File file = File("$path/app-release-v$VERSION.apk");
   if (await file.exists()) {
     try {
-      file.delete();
+      await file.delete();
+    } on FileSystemException catch (_) {
+      print("Can't delete the file");
+    }
+  }
+  File file1 = File("$path/app-release-v$VERSION-vcc.apk");
+  if (await file1.exists()) {
+    try {
+      await file.delete();
     } on FileSystemException catch (_) {
       print("Can't delete the file");
     }
@@ -221,20 +230,22 @@ void checkUpdate(BuildContext context) async {
     String data = response.body;
     String url = "";
     String version = "";
-    if (data.endsWith(VERSION.toString())) {
+    if (data.endsWith("$VERSION\n")) {
       return;
     }
-    if (data.endsWith("VCC")) {
-      version = VERSION.toString();
+    if (data.endsWith("VCC\n")) {
+      version = "$VERSION-vcc";
       url =
           "https://github.com/SoumadeepChoudhury/Xpens/releases/download/v$VERSION/app-release.apk";
     } else {
-      data = data.replaceAll(
-          data.substring(0, data.indexOf(VERSION.toString())), "");
-      data = data.replaceAll(data.substring(0, data.indexOf("\n") + 2), "");
-      String new_version = data;
+      data = data.replaceAll(data.substring(0, data.indexOf(VERSION)), "");
+      data = data.replaceAll("$VERSION\nv", "");
+      version = data;
+      if (version.endsWith("\n")) {
+        version = version.replaceAll("\n", "");
+      }
       url =
-          "https://github.com/SoumadeepChoudhury/Xpens/releases/download/v$new_version/app-release.apk";
+          "https://github.com/SoumadeepChoudhury/Xpens/releases/download/v$version/app-release.apk";
     }
     if (url.isNotEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -249,6 +260,15 @@ void checkUpdate(BuildContext context) async {
               label: "Download",
               onPressed: () {
                 downloadAndInstallAPK(url, version, context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                      behavior: SnackBarBehavior.floating,
+                      content: Text(
+                        "Check notification... After download completes, click it to open.",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      duration: Duration(seconds: 10)),
+                );
               }),
         ),
       );
@@ -260,11 +280,9 @@ void checkUpdate(BuildContext context) async {
 
 Future<void> downloadAndInstallAPK(
     String apkUrl, String version, BuildContext context) async {
-  MyDownloader.context = context;
-
   // Request storage permission
   if (await Permission.storage.request().isGranted) {
-    final savePath = directoryPath;
+    final savePath = "/storage/emulated/0/Download";
     final fileName = "app-release-v$version.apk";
 
     // Track download completion
@@ -273,7 +291,7 @@ Future<void> downloadAndInstallAPK(
     // Start downloading
     String? taskId = await FlutterDownloader.enqueue(
       url: apkUrl,
-      savedDir: savePath!,
+      savedDir: savePath,
       fileName: fileName,
       showNotification: true,
       openFileFromNotification: true,
@@ -286,25 +304,8 @@ Future<void> downloadAndInstallAPK(
 }
 
 class MyDownloader {
-  static BuildContext? context;
   @pragma('vm:entry-point')
   static void downloadCallback(String id, int status, int progress) async {
     print("$status -> $progress");
-    if (status == 3) {
-      if (context != null) {
-        ScaffoldMessenger.of(context!).showSnackBar(
-          SnackBar(
-            behavior: SnackBarBehavior.floating,
-            content: Text(
-              "Check notification... Click on the newly downloaded version.",
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            duration: Duration(days: 1),
-          ),
-        );
-      } else {
-        print("Context is null");
-      }
-    }
   }
 }

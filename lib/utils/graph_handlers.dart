@@ -22,8 +22,6 @@ class Graph extends StatefulWidget {
 }
 
 class _GraphState extends State<Graph> {
-  final DatabaseService db = DatabaseService.instance;
-
   Map<String, double> transactionRecords = {};
 
   @override
@@ -31,6 +29,7 @@ class _GraphState extends State<Graph> {
     super.initState();
 
     for (var category in favourite_components) {
+      DatabaseService db = DatabaseService.instance;
       db
           .getSpecificTransactions(widget.tableName, category)
           .then((accountsList) {

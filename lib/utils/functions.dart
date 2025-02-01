@@ -1,8 +1,16 @@
+import 'dart:io';
+import 'dart:isolate';
+import 'dart:ui';
+
 import 'package:android_intent_plus/android_intent.dart';
 import 'package:android_intent_plus/flag.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_downloader/flutter_downloader.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:xpens/utils/card_model.dart';
 import 'package:xpens/utils/transaction_model.dart';
 import 'package:xpens/variables.dart';
+import 'package:http/http.dart' as http;
 
 getNameFromUsername() {
   if (userName.contains(" ")) {
@@ -155,6 +163,16 @@ getMsgFromTimeofday() {
   return "";
 }
 
+String generateTransactionID() {
+  DateTime now = DateTime.now();
+  String timestamp = now.millisecondsSinceEpoch.toString();
+  String randomPart =
+      (1000 + (9999 - 1000) * (DateTime.now().microsecondsSinceEpoch % 1000))
+          .toString();
+
+  return "TXN$timestamp$randomPart"; // Example: TXN1706713401123456
+}
+
 void openUPIPayment({
   required double amount,
   required String title,
@@ -162,17 +180,19 @@ void openUPIPayment({
   String payeename = "",
   String qrData = "",
 }) async {
+  String tid_tr = generateTransactionID();
   AndroidIntent? intent;
   if (qrData.isNotEmpty) {
     intent = AndroidIntent(
       action: 'android.intent.action.VIEW',
-      data: "$qrData&am=$amount&cu=INR&tn=$title",
+      data: "$qrData&am=$amount&cu=INR&tn=$title&tid=$tid_tr&tr=$tid_tr",
       flags: [Flag.FLAG_ACTIVITY_NEW_TASK],
     );
   } else if (upiid.isNotEmpty) {
     intent = AndroidIntent(
       action: 'android.intent.action.VIEW',
-      data: "upi://pay?pa=$upiid&pn=$payeename&am=$amount&cu=INR&tn=$title",
+      data:
+          "upi://pay?pa=$upiid&pn=$payeename&am=$amount&cu=INR&tn=$title&tid=$tid_tr&tr=$tid_tr",
       flags: [Flag.FLAG_ACTIVITY_NEW_TASK],
     );
   }
@@ -184,4 +204,107 @@ void openUPIPayment({
 bool isValidDecimal(String input) {
   final RegExp regex = RegExp(r'^\d+(\.\d+)?$');
   return regex.hasMatch(input);
+}
+
+void checkUpdate(BuildContext context) async {
+  File file = File("$directoryPath/app-release-v$VERSION.apk");
+  if (await file.exists()) {
+    try {
+      file.delete();
+    } on FileSystemException catch (_) {
+      print("Can't delete the file");
+    }
+  }
+  final response = await http.get(Uri.parse(
+      "https://raw.githubusercontent.com/SoumadeepChoudhury/Xpens/refs/heads/main/VERSION_TRACKER.txt"));
+  if (response.statusCode == 200) {
+    String data = response.body;
+    String url = "";
+    String version = "";
+    if (data.endsWith(VERSION.toString())) {
+      return;
+    }
+    if (data.endsWith("VCC")) {
+      version = VERSION.toString();
+      url =
+          "https://github.com/SoumadeepChoudhury/Xpens/releases/download/v$VERSION/app-release.apk";
+    } else {
+      data = data.replaceAll(
+          data.substring(0, data.indexOf(VERSION.toString())), "");
+      data = data.replaceAll(data.substring(0, data.indexOf("\n") + 2), "");
+      String new_version = data;
+      url =
+          "https://github.com/SoumadeepChoudhury/Xpens/releases/download/v$new_version/app-release.apk";
+    }
+    if (url.isNotEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          content: Text(
+            "New Update Available",
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          duration: Duration(days: 1),
+          action: SnackBarAction(
+              label: "Download",
+              onPressed: () {
+                downloadAndInstallAPK(url, version, context);
+              }),
+        ),
+      );
+    }
+  } else {
+    print("Fail");
+  }
+}
+
+Future<void> downloadAndInstallAPK(
+    String apkUrl, String version, BuildContext context) async {
+  MyDownloader.context = context;
+
+  // Request storage permission
+  if (await Permission.storage.request().isGranted) {
+    final savePath = directoryPath;
+    final fileName = "app-release-v$version.apk";
+
+    // Track download completion
+    FlutterDownloader.registerCallback(MyDownloader.downloadCallback);
+
+    // Start downloading
+    String? taskId = await FlutterDownloader.enqueue(
+      url: apkUrl,
+      savedDir: savePath!,
+      fileName: fileName,
+      showNotification: true,
+      openFileFromNotification: true,
+    );
+
+    print("Download started: $taskId");
+  } else {
+    print("Permission Denied!");
+  }
+}
+
+class MyDownloader {
+  static BuildContext? context;
+  @pragma('vm:entry-point')
+  static void downloadCallback(String id, int status, int progress) async {
+    print("$status -> $progress");
+    if (status == 3) {
+      if (context != null) {
+        ScaffoldMessenger.of(context!).showSnackBar(
+          SnackBar(
+            behavior: SnackBarBehavior.floating,
+            content: Text(
+              "Check notification... Click on the newly downloaded version.",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            duration: Duration(days: 1),
+          ),
+        );
+      } else {
+        print("Context is null");
+      }
+    }
+  }
 }

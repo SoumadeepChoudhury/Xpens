@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:xpens/components/bottom_navigation_bar.dart';
 import 'package:xpens/pages/welcome.dart';
 import 'package:xpens/utils/database.dart';
@@ -9,6 +10,7 @@ import 'package:xpens/variables.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await FlutterDownloader.initialize();
   directoryPath = await fileManager.getDirectoryPath();
   directoryPath = "$directoryPath/";
   bool isHome = await File("${directoryPath}profile.json").exists();
@@ -45,6 +47,7 @@ class MyApp extends StatelessWidget {
 
   final Widget widget;
   // This widget is the root of your application.
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

@@ -245,6 +245,9 @@ void checkUpdate(BuildContext context) async {
     if (data.endsWith("$VERSION\n")) {
       return;
     }
+    if (data.endsWith("$VERSION")) {
+      return;
+    }
     if (data.endsWith("VCC\n")) {
       version = "$VERSION-vcc";
       url =

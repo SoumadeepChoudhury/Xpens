@@ -1,13 +1,8 @@
 import 'dart:io';
-import 'dart:isolate';
-import 'dart:ui';
 
-import 'package:android_intent_plus/android_intent.dart';
-import 'package:android_intent_plus/flag.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:xpens/utils/card_model.dart';
 import 'package:xpens/utils/transaction_model.dart';
 import 'package:xpens/variables.dart';

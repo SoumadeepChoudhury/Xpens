@@ -3,7 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:xpens/utils/file_manager.dart';
 
-String VERSION = "1.2.0";
+String VERSION = "1.2.1";
 
 bool isAccountAdded = false;
 

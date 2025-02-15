@@ -7,6 +7,7 @@ import 'package:android_intent_plus/flag.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:xpens/utils/card_model.dart';
 import 'package:xpens/utils/transaction_model.dart';
 import 'package:xpens/variables.dart';
@@ -42,9 +43,10 @@ getDate(var now) {
 }
 
 getFormattedAmount(double amount) {
+  String _amount = amount.toStringAsFixed(2);
   int counter = 3;
-  int index = amount.toString().indexOf(".");
-  String refinedAmount = amount.toString().substring(0, index);
+  int index = _amount.indexOf(".");
+  String refinedAmount = _amount.substring(0, index);
   String finalAmountReversed = "";
   String finalAmount = "";
   for (int i = refinedAmount.length - 1; i >= 0; i--) {
@@ -57,7 +59,7 @@ getFormattedAmount(double amount) {
   for (int i = finalAmountReversed.length - 1; i >= 0; i--) {
     finalAmount += finalAmountReversed[i];
   }
-  return finalAmount + amount.toString().substring(index);
+  return finalAmount + _amount.substring(index);
 }
 
 //get the balance from title and if title not mentioned get the balance of the primary account
@@ -180,25 +182,40 @@ void openUPIPayment({
   String payeename = "",
   String qrData = "",
 }) async {
-  String tid_tr = generateTransactionID();
-  AndroidIntent? intent;
-  if (qrData.isNotEmpty) {
-    intent = AndroidIntent(
-      action: 'android.intent.action.VIEW',
-      data: "$qrData&am=$amount&cu=INR&tn=$title&tid=$tid_tr&tr=$tid_tr",
-      flags: [Flag.FLAG_ACTIVITY_NEW_TASK],
-    );
-  } else if (upiid.isNotEmpty) {
-    intent = AndroidIntent(
-      action: 'android.intent.action.VIEW',
-      data:
-          "upi://pay?pa=$upiid&pn=$payeename&am=$amount&cu=INR&tn=$title&tid=$tid_tr&tr=$tid_tr",
-      flags: [Flag.FLAG_ACTIVITY_NEW_TASK],
-    );
-  }
-  if (intent != null) {
-    await intent.launch();
-  }
+  // String tid_tr = generateTransactionID();
+  // AndroidIntent? intent;
+  // if (qrData.isNotEmpty) {
+  //   intent = AndroidIntent(
+  //     action: 'android.intent.action.VIEW',
+  //     data: "$qrData&am=$amount&cu=INR&tn=$title&tid=$tid_tr&tr=$tid_tr",
+  //     flags: [Flag.FLAG_ACTIVITY_NEW_TASK],
+  //   );
+  // } else if (upiid.isNotEmpty) {
+  //   intent = AndroidIntent(
+  //     action: 'android.intent.action.VIEW',
+  //     data:
+  //         "upi://pay?pa=$upiid&pn=$payeename&am=$amount&cu=INR&tn=$title&tid=$tid_tr&tr=$tid_tr",
+  //     package: 'com.google.android.apps.nbu.paisa.user',
+  //     flags: [Flag.FLAG_ACTIVITY_NEW_TASK],
+  //   );
+  // }
+  // if (intent != null) {
+  //   // await intent.launch();
+  // }
+  // String url =
+  //     "intent://upi/#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;component=com.google.android.apps.nbu.paisa.user/com.google.android.apps.nbu.paisa.user.activities.MainActivity;end;";
+
+  // if (await canLaunchUrl(Uri.parse(url))) {
+  //   await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+  // }
+  // final intent = AndroidIntent(
+  //   action: 'android.intent.action.VIEW',
+  //   package: 'com.google.android.apps.nbu.paisa.user',
+  //   componentName:
+  //       'com.google.android.apps.nbu.paisa.user/com.google.android.apps.nbu.paisa.user.ui.HomeActivity',
+  //   flags: <int>[Flag.FLAG_ACTIVITY_NEW_TASK],
+  // );
+  // intent.launch();
 }
 
 bool isValidDecimal(String input) {

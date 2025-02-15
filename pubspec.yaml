@@ -28,6 +28,7 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
+  android_intent_plus: ^5.2.2
   cupertino_icons: ^1.0.8
   fl_chart: ^0.70.2
   flutter:
@@ -39,7 +40,7 @@ dependencies:
   path_provider: ^2.1.5
   permission_handler: ^11.3.1
   sqflite: ^2.4.1
-  android_intent_plus: ^5.2.2
+  url_launcher: ^6.3.1
 
 dev_dependencies:
   flutter_lints: ^5.0.0

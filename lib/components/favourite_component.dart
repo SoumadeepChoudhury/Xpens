@@ -60,7 +60,7 @@ class _FavouriteCategoryState extends State<FavouriteCategory> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               //Scan QR Code
-                              !isUPISelected && !isQRScannerOpened
+                              !isUPISelected && !isQRScannerOpened && false
                                   ? Row(
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceBetween,

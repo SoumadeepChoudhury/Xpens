@@ -33,7 +33,9 @@ void main() async {
     fileManager
         .readJsonFile(directoryPath!, 'profile.json')
         .then((_) => runApp(MyApp(
-              widget: CustomBottomNavigationBar(),
+              widget: CustomBottomNavigationBar(
+                pageIndex: currentPageIndex,
+              ),
             )));
   } else {
     runApp(MyApp(

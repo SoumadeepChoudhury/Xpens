@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:xpens/utils/card_model.dart';
 import 'package:xpens/utils/transaction_model.dart';
@@ -219,7 +220,8 @@ bool isValidDecimal(String input) {
 }
 
 void checkUpdate(BuildContext context) async {
-  String path = "/storage/emulated/0/Download";
+  String path = (await getExternalStorageDirectory())?.path ??
+      "/storage/emulated/0/Download";
   File file = File("$path/app-release-v$VERSION.apk");
   if (await file.exists()) {
     try {
@@ -242,13 +244,10 @@ void checkUpdate(BuildContext context) async {
     String data = response.body;
     String url = "";
     String version = "";
-    if (data.endsWith("$VERSION\n")) {
+    if (data.endsWith(VERSION) || data.endsWith("$VERSION\n")) {
       return;
     }
-    if (data.endsWith("$VERSION")) {
-      return;
-    }
-    if (data.endsWith("VCC\n")) {
+    if (data.endsWith("VCC\n") || data.endsWith("VCC")) {
       version = "$VERSION-vcc";
       url =
           "https://github.com/SoumadeepChoudhury/Xpens/releases/download/v$VERSION/app-release.apk";
@@ -279,7 +278,7 @@ void checkUpdate(BuildContext context) async {
                   SnackBar(
                       behavior: SnackBarBehavior.floating,
                       content: Text(
-                        "Check notification... After download completes, click it to open.",
+                        "Check notification... After download completes, click it to install.",
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                       duration: Duration(seconds: 10)),
@@ -296,8 +295,10 @@ void checkUpdate(BuildContext context) async {
 Future<void> downloadAndInstallAPK(
     String apkUrl, String version, BuildContext context) async {
   // Request storage permission
-  if (await Permission.storage.request().isGranted) {
-    final savePath = "/storage/emulated/0/Download";
+  if (await Permission.manageExternalStorage.request().isGranted ||
+      await Permission.storage.request().isGranted) {
+    final savePath = (await getExternalStorageDirectory())?.path ??
+        "/storage/emulated/0/Download";
     final fileName = "app-release-v$version.apk";
 
     // Track download completion

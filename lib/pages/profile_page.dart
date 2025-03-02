@@ -34,6 +34,11 @@ class _ProfilePageState extends State<ProfilePage> {
                     if (image != null) {
                       fileManager.copyFile(
                           image.path, "${directoryPath}profile.jpg");
+                      fileManager.updateJsonFile(
+                          "profile_url",
+                          "${directoryPath}profile.jpg",
+                          directoryPath!,
+                          "profile.json");
                       setState(() {
                         _selectedImage = File(image.path);
                         profile_url = "${directoryPath}profile.jpg";

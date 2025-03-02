@@ -6,8 +6,9 @@ import 'package:xpens/pages/profile_page.dart';
 import 'package:xpens/variables.dart';
 
 class CustomBottomNavigationBar extends StatefulWidget {
-  const CustomBottomNavigationBar({super.key});
+  const CustomBottomNavigationBar({super.key, required this.pageIndex});
 
+  final int pageIndex;
   @override
   State<CustomBottomNavigationBar> createState() =>
       _CustomBottomNavigationBarState();
@@ -23,6 +24,7 @@ class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar> {
 
   @override
   Widget build(BuildContext context) {
+    currentPageIndex = widget.pageIndex;
     return Scaffold(
       extendBody: true,
       body: GestureDetector(

@@ -48,8 +48,9 @@ class _WelcomeDataComponentState extends State<WelcomeDataComponent> {
                       Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                              builder: (context) =>
-                                  CustomBottomNavigationBar()));
+                              builder: (context) => CustomBottomNavigationBar(
+                                    pageIndex: 1,
+                                  )));
                     }
                     if (userName.isNotEmpty || email.isNotEmpty) {
                       _controller.clear();

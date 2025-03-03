@@ -5,10 +5,10 @@ import 'package:xpens/pages/home_page.dart';
 import 'package:xpens/pages/profile_page.dart';
 import 'package:xpens/variables.dart';
 
+// ignore: must_be_immutable
 class CustomBottomNavigationBar extends StatefulWidget {
-  const CustomBottomNavigationBar({super.key, required this.pageIndex});
-
-  final int pageIndex;
+  CustomBottomNavigationBar({super.key, this.pageIndex});
+  dynamic pageIndex;
   @override
   State<CustomBottomNavigationBar> createState() =>
       _CustomBottomNavigationBarState();
@@ -24,7 +24,6 @@ class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar> {
 
   @override
   Widget build(BuildContext context) {
-    currentPageIndex = widget.pageIndex;
     return Scaffold(
       extendBody: true,
       body: GestureDetector(
@@ -35,6 +34,7 @@ class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar> {
               if (currentPageIndex > 0) {
                 if (isAccountAdded) {
                   currentPageIndex -= 1;
+                  widget.pageIndex = null;
                 }
               }
             });
@@ -43,6 +43,7 @@ class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar> {
               if (currentPageIndex != _pages.length - 1) {
                 if (isAccountAdded) {
                   currentPageIndex += 1;
+                  widget.pageIndex = null;
                 }
               }
             });
@@ -59,7 +60,7 @@ class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar> {
           //   ),
           //   child: child,
           // ),
-          child: _pages[currentPageIndex],
+          child: _pages[widget.pageIndex ?? currentPageIndex],
         ),
       ),
       resizeToAvoidBottomInset: false,
@@ -137,6 +138,7 @@ class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar> {
         setState(() {
           if (isAccountAdded) {
             currentPageIndex = index;
+            widget.pageIndex = null;
           }
         });
       },

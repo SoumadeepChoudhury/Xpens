@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:xpens/utils/file_manager.dart';
 
 String VERSION = "1.2.1";
+String VC = "9";
 
 bool isAccountAdded = false;
 

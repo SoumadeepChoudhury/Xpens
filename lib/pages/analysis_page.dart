@@ -193,7 +193,7 @@ class _AnalysisPageState extends State<AnalysisPage> {
                   margin: EdgeInsets.only(top: 12),
                   height: 300,
                   child: Graph(
-                    key: ValueKey(selectedAccount),
+                    key: UniqueKey(),
                     selectedGraphType: selectedGraphType,
                     tableName: getTransactionTableName(
                         selectedAccountCardNo, selectedAccount),

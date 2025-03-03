@@ -34,8 +34,7 @@ void main() async {
         .readJsonFile(directoryPath!, 'profile.json')
         .then((_) => runApp(MyApp(
               widget: CustomBottomNavigationBar(
-                pageIndex: currentPageIndex,
-              ),
+                  pageIndex: isAccountAdded ? 0 : null),
             )));
   } else {
     runApp(MyApp(

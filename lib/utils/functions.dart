@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
+// import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:xpens/utils/card_model.dart';
@@ -36,6 +37,29 @@ getDate(var now) {
   final month = int.parse(now.substring(5, 7));
   final date = now.substring(8, 10);
   return "${months[month - 1]} $date, $year";
+}
+
+DateTime parseCustomDate(String dateStr) {
+  Map<String, int> monthMap = {
+    "January": 1,
+    "February": 2,
+    "March": 3,
+    "April": 4,
+    "May": 5,
+    "June": 6,
+    "July": 7,
+    "August": 8,
+    "September": 9,
+    "October": 10,
+    "November": 11,
+    "December": 12,
+  };
+  List<String> parts = dateStr.split(' '); // ["March", "03,", "2025"]
+  int month = monthMap[parts[0]]!; // Convert month name to number
+  int day = int.parse(parts[1].replaceAll(',', '')); // Remove comma
+  int year = int.parse(parts[2]);
+
+  return DateTime(year, month, day);
 }
 
 getFormattedAmount(double amount) {
@@ -130,13 +154,16 @@ Map<String, String> getDateRange(String option) {
 }
 
 List<AccountTransaction> getFilteredList(
-    List<AccountTransaction> accounts, String dateUptoWhichFilter) {
+    List<AccountTransaction> accounts, String startDate) {
   List<AccountTransaction> filteredList = [];
+  DateTime formattedStartdate = parseCustomDate(startDate);
+  bool started = false;
   for (var acc in accounts) {
-    if (acc.date == dateUptoWhichFilter) {
-      break;
+    DateTime formattedDate = parseCustomDate(acc.date);
+    if (!formattedDate.isBefore(formattedStartdate)) {
+      started = true;
     }
-    filteredList.add(acc);
+    if (started) filteredList.add(acc);
   }
   return filteredList;
 }
@@ -233,7 +260,7 @@ void checkUpdate(BuildContext context) async {
   File file1 = File("$path/app-release-v$VERSION-vcc.apk");
   if (await file1.exists()) {
     try {
-      await file.delete();
+      await file1.delete();
     } on FileSystemException catch (_) {
       print("Can't delete the file");
     }
@@ -244,23 +271,43 @@ void checkUpdate(BuildContext context) async {
     String data = response.body;
     String url = "";
     String version = "";
-    if (data.endsWith(VERSION) || data.endsWith("$VERSION\n")) {
-      return;
-    }
-    if (data.endsWith("VCC\n") || data.endsWith("VCC")) {
-      version = "$VERSION-vcc";
+    //NEW
+    List versions = data.split("\n");
+    String latest = versions[versions.length - 1];
+    List latest_split = latest.split("/");
+    String latestVersion = latest_split[0].replaceAll("v", "");
+    String latestVersionCode = latest_split[1];
+    if (VERSION != latestVersion) {
       url =
-          "https://github.com/SoumadeepChoudhury/Xpens/releases/download/v$VERSION/app-release.apk";
+          "https://github.com/SoumadeepChoudhury/Xpens/releases/download/v$latestVersion/app-release.apk";
+      version = latestVersion;
     } else {
-      data = data.replaceAll(data.substring(0, data.indexOf(VERSION)), "");
-      data = data.replaceAll("$VERSION\nv", "");
-      version = data;
-      if (version.endsWith("\n")) {
-        version = version.replaceAll("\n", "");
+      if (VC != latestVersionCode) {
+        url =
+            "https://github.com/SoumadeepChoudhury/Xpens/releases/download/v$VERSION/app-release.apk";
+        version = "$latestVersion-vcc";
       }
-      url =
-          "https://github.com/SoumadeepChoudhury/Xpens/releases/download/v$version/app-release.apk";
     }
+
+    //OLD
+    // if (data.endsWith(VERSION) || data.endsWith("$VERSION\n")) {
+    //   return;
+    // }
+    // if (data.endsWith("VCC\n") || data.endsWith("VCC")) {
+    //   version = "$VERSION-vcc";
+    //   print(data.split("\n").length);
+    //   url =
+    //       "https://github.com/SoumadeepChoudhury/Xpens/releases/download/v$VERSION/app-release.apk";
+    // } else {
+    //   data = data.replaceAll(data.substring(0, data.indexOf(VERSION)), "");
+    //   data = data.replaceAll("$VERSION\nv", "");
+    //   version = data;
+    //   if (version.endsWith("\n")) {
+    //     version = version.replaceAll("\n", "");
+    //   }
+    //   url =
+    //       "https://github.com/SoumadeepChoudhury/Xpens/releases/download/v$version/app-release.apk";
+    // }
     if (url.isNotEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -272,16 +319,23 @@ void checkUpdate(BuildContext context) async {
           duration: Duration(days: 1),
           action: SnackBarAction(
               label: "Download",
-              onPressed: () {
-                downloadAndInstallAPK(url, version, context);
+              onPressed: () async {
+                String? taskId =
+                    await downloadAndInstallAPK(url, version, context);
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                      behavior: SnackBarBehavior.floating,
-                      content: Text(
-                        "Check notification... After download completes, click it to install.",
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      duration: Duration(seconds: 10)),
+                    behavior: SnackBarBehavior.floating,
+                    content: Text(
+                      "Automatically installation will start..\nIf not, Check notification... After download completes, click it to install.",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    duration: Duration(seconds: 10),
+                    action: SnackBarAction(
+                        label: "Cancel",
+                        onPressed: () async {
+                          await FlutterDownloader.cancel(taskId: taskId!);
+                        }),
+                  ),
                 );
               }),
         ),
@@ -292,7 +346,7 @@ void checkUpdate(BuildContext context) async {
   }
 }
 
-Future<void> downloadAndInstallAPK(
+Future<String?> downloadAndInstallAPK(
     String apkUrl, String version, BuildContext context) async {
   // Request storage permission
   if (await Permission.manageExternalStorage.request().isGranted ||
@@ -301,21 +355,23 @@ Future<void> downloadAndInstallAPK(
         "/storage/emulated/0/Download";
     final fileName = "app-release-v$version.apk";
 
-    // Track download completion
-    FlutterDownloader.registerCallback(MyDownloader.downloadCallback);
+    if (await Permission.notification.request().isGranted) {
+      // Track download completion
+      FlutterDownloader.registerCallback(MyDownloader.downloadCallback);
 
-    // Start downloading
-    String? taskId = await FlutterDownloader.enqueue(
-      url: apkUrl,
-      savedDir: savePath,
-      fileName: fileName,
-      showNotification: true,
-      openFileFromNotification: true,
-    );
+      // Start downloading
+      String? taskId = await FlutterDownloader.enqueue(
+        url: apkUrl,
+        savedDir: savePath,
+        fileName: fileName,
+        showNotification: true,
+        openFileFromNotification: true,
+      );
 
-    print("Download started: $taskId");
+      return taskId;
+    }
   } else {
-    print("Permission Denied!");
+    return null;
   }
 }
 
@@ -323,5 +379,19 @@ class MyDownloader {
   @pragma('vm:entry-point')
   static void downloadCallback(String id, int status, int progress) async {
     print("$status -> $progress");
+    if (progress == 100) {
+      print("Downlaod completed");
+      // String? filePath = await getDownloadPath();
+      // print(filePath);
+      // if (filePath != null) {
+      // File file = File(
+      //     "/storage/emulated/0/Android/data/com.example.xpens-debug/files/");
+      // try {
+      //   OpenFilex.open(file.path);
+      // } catch (e) {
+      //   print("Can't open file");
+      // }
+      // }
+    }
   }
 }

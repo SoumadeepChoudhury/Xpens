@@ -3,8 +3,8 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:xpens/utils/file_manager.dart';
 
-String VERSION = "1.2.1";
-String VC = "9";
+String VERSION = "1.2.2";
+String VC = "10";
 
 bool isAccountAdded = false;
 
@@ -17,7 +17,8 @@ double home_page_profile_icon_size = 50;
 double home_page_profile_text_size = 20;
 double your_current_balance_text_size = 15;
 
-Color amount_deducted_color = Color.fromARGB(255, 244, 54, 127);
+Color amount_deducted_color = Colors.white;
+// Color amount_deducted_color = Color.fromARGB(255, 244, 54, 127);
 Color amount_added_color = Colors.green;
 
 List<String> favourite_components = [
